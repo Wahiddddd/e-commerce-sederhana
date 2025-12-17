@@ -31,3 +31,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Maven
+target/
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+
