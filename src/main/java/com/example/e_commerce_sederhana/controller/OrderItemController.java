@@ -17,7 +17,6 @@ public class OrderItemController {
         this.service = service;
     }
 
-    // GET /orders/{orderId}/items
     @GetMapping("/{orderId}/items")
     public List<OrderItem> getItems(@PathVariable Long orderId) {
         return service.findByOrderId(orderId);
@@ -26,9 +25,9 @@ public class OrderItemController {
     @PostMapping("/{orderId}/items")
     public String addItem(@PathVariable Long orderId,
                           @RequestBody AddItemRequest req) {
+
         service.addItem(orderId, req.getProductId(), req.getQuantity());
         return "Item added";
     }
-
 }
 

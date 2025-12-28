@@ -1,8 +1,8 @@
 package com.example.e_commerce_sederhana.repository;
 
+import com.example.e_commerce_sederhana.entity.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import java.util.List;
 
 @Repository
 public class UserRepository {
@@ -13,10 +13,43 @@ public class UserRepository {
         this.jdbc = jdbc;
     }
 
-    public boolean hasRole(Long userId, String role) {
-        String sql = "SELECT COUNT(*) FROM user_roles WHERE user_id=? AND role=?";
-        Integer count = jdbc.queryForObject(sql, Integer.class, userId, role);
-        return count != null && count > 0;
+    public Long save(User user) {
+        String sql = """
+            INSERT INTO users(name, email, password)
+            VALUES (?, ?, ?)
+        """;
+        jdbc.update(sql, user.getName(), user.getEmail(), user.getPassword());
+
+        return jdbc.queryForObject(
+                "SELECT LAST_INSERT_ID()", Long.class
+        );
+    }
+
+    public User findByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        return jdbc.queryForObject(sql, (rs, rowNum) -> {
+            User u = new User();
+            u.setId(rs.getLong("id"));
+            u.setName(rs.getString("name"));
+            u.setEmail(rs.getString("email"));
+            u.setPassword(rs.getString("password"));
+            return u;
+        }, email);
+    }
+
+    public User findById(Long id) {
+        String sql = "SELECT * FROM users WHERE id = ?";
+        return jdbc.queryForObject(sql, (rs, rowNum) -> {
+            User u = new User();
+            u.setId(rs.getLong("id"));
+            u.setName(rs.getString("name"));
+            u.setEmail(rs.getString("email"));
+            u.setPassword(rs.getString("password"));
+            return u;
+        }, id);
     }
 }
+
+
+
 

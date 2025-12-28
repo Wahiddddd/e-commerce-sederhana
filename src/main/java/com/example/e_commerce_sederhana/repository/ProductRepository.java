@@ -13,17 +13,22 @@ public class ProductRepository {
         this.jdbc = jdbc;
     }
 
-    public void insert(Product p) {
+    public void save(Product product) {
         String sql = """
             INSERT INTO products(name, price, stock, seller_id)
             VALUES (?, ?, ?, ?)
         """;
-        jdbc.update(sql, p.getName(), p.getPrice(), p.getStock(), p.getSellerId());
+        jdbc.update(sql,
+                product.getName(),
+                product.getPrice(),
+                product.getStock(),
+                product.getSellerId()
+        );
     }
 
     public Product findById(Long id) {
-        String sql = "SELECT * FROM products WHERE id=?";
-        return jdbc.queryForObject(sql, (rs, n) -> {
+        String sql = "SELECT * FROM products WHERE id = ?";
+        return jdbc.queryForObject(sql, (rs, rowNum) -> {
             Product p = new Product();
             p.setId(rs.getLong("id"));
             p.setName(rs.getString("name"));
@@ -35,6 +40,10 @@ public class ProductRepository {
     }
 
     public void updateStock(Long id, int stock) {
-        jdbc.update("UPDATE products SET stock=? WHERE id=?", stock, id);
+        jdbc.update(
+                "UPDATE products SET stock = ? WHERE id = ?",
+                stock, id
+        );
     }
 }
+
