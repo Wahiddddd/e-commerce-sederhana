@@ -6,32 +6,33 @@ import com.example.e_commerce_sederhana.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
-public class UserService {
+public class AuthService {
 
     private final UserRepository userRepo;
     private final RoleRepository roleRepo;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public UserService(UserRepository userRepo, RoleRepository roleRepo) {
+    public AuthService(UserRepository userRepo, RoleRepository roleRepo) {
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
     }
 
-    public Long register(User user) {
-        user.setPassword(encoder.encode(user.getPassword()));
-        Long userId = userRepo.save(user);
+    public User authenticate(String email, String rawPassword) {
+        User user = userRepo.findByEmail(email);
 
-        // default role
-        roleRepo.addRole(userId, "ROLE_BUYER");
+        if (!encoder.matches(rawPassword, user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
 
-        return userId;
+        return user;
     }
 
-    public void addRole(Long userId, String role) {
-        roleRepo.addRole(userId, role);
+    public List<String> getRoles(Long userId) {
+        return roleRepo.findRolesByUserId(userId);
     }
 }
-
 
 

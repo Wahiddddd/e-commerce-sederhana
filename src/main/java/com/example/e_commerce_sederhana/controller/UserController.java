@@ -1,6 +1,6 @@
 package com.example.e_commerce_sederhana.controller;
 
-import com.example.e_commerce_sederhana.entity.User;
+import com.example.e_commerce_sederhana.repository.UserRepository;
 import com.example.e_commerce_sederhana.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,25 +8,21 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserService service;
+    private final UserService userService;
+    private final UserRepository userRepo;
 
-    public UserController(UserService service) {
-        this.service = service;
+    public UserController(UserService userService, UserRepository userRepo) {
+        this.userService = userService;
+        this.userRepo = userRepo;
     }
 
-    // CREATE USER
-    @PostMapping
-    public String createUser(@RequestBody User user) {
-        Long id = service.createUser(user);
-        return "User created with id = " + id;
-    }
-
-    // ADD ROLE
-    @PostMapping("/{id}/roles")
-    public String addRole(@PathVariable Long id,
+    // ADMIN ONLY
+    @PostMapping("/{userId}/roles")
+    public String addRole(@PathVariable Long userId,
                           @RequestParam String role) {
-        service.addRole(id, role);
+        userService.addRole(userId, role);
         return "Role added";
     }
 }
+
 

@@ -4,6 +4,8 @@ import com.example.e_commerce_sederhana.entity.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+
 @Repository
 public class OrderRepository {
 
@@ -14,14 +16,20 @@ public class OrderRepository {
     }
 
     public Long create(Long buyerId) {
-        jdbc.update("INSERT INTO orders(buyer_id,status,total) VALUES (?,?,0)",
-                buyerId, "PENDING");
-        return jdbc.queryForObject("SELECT MAX(id) FROM orders", Long.class);
+        String sql = """
+            INSERT INTO orders(buyer_id, status, total_price)
+            VALUES (?, 'PENDING', 0)
+        """;
+        jdbc.update(sql, buyerId);
+
+        return jdbc.queryForObject(
+                "SELECT LAST_INSERT_ID()", Long.class
+        );
     }
 
     public Order findById(Long id) {
-        String sql = "SELECT * FROM orders WHERE id=?";
-        return jdbc.queryForObject(sql, (rs,n)->{
+        String sql = "SELECT * FROM orders WHERE id = ?";
+        return jdbc.queryForObject(sql, (rs, rowNum) -> {
             Order o = new Order();
             o.setId(rs.getLong("id"));
             o.setBuyerId(rs.getLong("buyer_id"));
@@ -31,12 +39,18 @@ public class OrderRepository {
         }, id);
     }
 
-    public void updateTotal(Long id, double total) {
-        jdbc.update("UPDATE orders SET total=? WHERE id=?", total, id);
+    public void updateTotal(Long orderId, BigDecimal total) {
+        jdbc.update(
+                "UPDATE orders SET total_price = ? WHERE id = ?",
+                total, orderId
+        );
     }
 
-    public void updateStatus(Long id, String status) {
-        jdbc.update("UPDATE orders SET status=? WHERE id=?", status, id);
+    public void updateStatus(Long orderId, String status) {
+        jdbc.update(
+                "UPDATE orders SET status = ? WHERE id = ?",
+                status, orderId
+        );
     }
 }
 
