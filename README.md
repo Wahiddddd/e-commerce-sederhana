@@ -1,24 +1,40 @@
 # 🛒 E-Commerce Sederhana — Backend REST API
-## 🎯 Latar Belakang & Alasan Solusi Dibuat
+## 🎯 Problem Statement
 
-Dalam proses digitalisasi bisnis, sistem e-commerce membutuhkan backend yang mampu mengelola pengguna, produk, pesanan, dan pembayaran secara terstruktur dan aman.
+Pada banyak bisnis kecil hingga menengah, proses jual beli sering kali masih dilakukan secara manual atau menggunakan sistem yang terpisah-pisah. Hal ini menyebabkan kesulitan dalam mengelola data produk, transaksi, serta hak akses pengguna (penjual dan pembeli).
 
-Project E-Commerce Sederhana dibuat untuk menjawab kebutuhan tersebut dengan tujuan:
-* Mensimulasikan alur bisnis e-commerce secara nyata
-* Melatih penerapan Backend Development menggunakan arsitektur yang baik
-* Menyediakan API yang aman dan mudah dikembangkan
+Sistem backend ini dibuat untuk mensimulasikan bagaimana sebuah platform e-commerce dapat:
+* Mengelola data pengguna, produk, dan transaksi secara terpusat
+* Menjaga keamanan akses pengguna
+* Memberikan alur transaksi yang jelas dan terstruktur
+
+Dengan adanya backend ini, proses bisnis menjadi lebih rapi, aman, dan mudah dikembangkan di masa depan.
 
 ## ⚙️ Gambaran Umum Cara Kerja Sistem
 
 Secara sederhana, sistem bekerja sebagai berikut:
 
-1. User melakukan registrasi dan login
-2. Sistem memberikan JWT Token sebagai identitas akses
-3. User dengan role tertentu dapat:
-   * Seller → membuat produk
-   * Buyer → membuat order, menambahkan item, dan melakukan pembayaran
-4. Semua proses dilakukan melalui REST API
-5. Data disimpan dan dikelola di database secara terstruktur
+1. User mendaftar dan login
+* Sistem memverifikasi email dan password
+* Jika valid, user akan mendapatkan JWT Token
+
+2. JWT digunakan untuk mengakses fitur
+* Token dikirim di setiap request melalui header
+* Sistem memastikan user sudah login sebelum mengakses fitur tertentu
+
+3. Seller dapat menambahkan produk
+* Produk disimpan ke database
+* Hanya user dengan role seller yang dapat melakukan aksi ini
+
+4. Buyer membuat order dan menambahkan item
+* Sistem menghitung subtotal dan total harga
+* Stock produk diperbarui secara otomatis
+
+5. Payment diproses
+* Sistem memvalidasi kepemilikan order
+* Status order diubah menjadi PAID
+
+Semua proses ini dilakukan melalui REST API dan dapat diakses oleh frontend atau aplikasi lain.
 
 ## 💼 Manfaat Sistem
 
@@ -31,6 +47,22 @@ Untuk Bisnis
 * Struktur backend siap dikembangkan
 * Mudah integrasi dengan frontend atau mobile app
 * Kontrol akses berbasis role (ADMIN, SELLER, BUYER)
+
+## ⚖️ Technical Decisions & Trade-Offs
+Beberapa keputusan teknis dalam project ini dibuat dengan pertimbangan pembelajaran dan kesederhanaan:
+* Menggunakan JDBC + SQL manual
+  * Memberikan kontrol penuh terhadap query
+  * Membantu memahami alur data dan transaksi database
+  * Trade-off: lebih banyak boilerplate dibandingkan JPA
+* Menggunakan JWT untuk authentication
+  * Stateless dan cocok untuk REST API
+  * Mudah diintegrasikan dengan frontend
+  * Trade-off: belum ada mekanisme token revocation
+* Role disimpan di tabel terpisah
+  * Memungkinkan satu user memiliki banyak role
+  * Lebih fleksibel untuk pengembangan lanjutan
+
+Keputusan ini dipilih agar sistem tetap mudah dipahami, terkontrol, dan scalable untuk skenario real-world sederhana.
 
 # 🔧 DOKUMENTASI TEKNIS
 ## 📐 Pengantar Teknis Sistem
@@ -61,26 +93,6 @@ Perancangan dilakukan dengan memisahkan:
 * DTO → komunikasi API
 * Service → logika bisnis
 
-## 🧩 Implementasi Core Backend & API
-
-Setiap fitur diimplementasikan melalui REST API:
-
-Authentication
-* Register user
-* Login dan generate JWT
-
-Product
-* Seller membuat produk
-
-Order
-* Buyer membuat order
-* Menambahkan item ke order
-
-Payment
-* Simulasi pembayaran berdasarkan order
-
-Semua endpoint diakses menggunakan HTTP Method standar (GET, POST).
-
 ## 🗄️ Pengelolaan Data
 * Menggunakan JDBC Template
 * Query SQL ditulis secara eksplisit
@@ -105,6 +117,68 @@ Hal ini mencegah akses tidak sah ke resource sistem.
   * Akses endpoint
   * Validasi alur bisnis
 * Struktur kode dibuat konsisten dan mudah dibaca
+
+## 📡 API Examples
+
+### 🔐 Authentication – Login
+
+| Method | Endpoint | Description |
+|------|---------|------------|
+| POST | `/auth/login` | Authenticate user and generate JWT |
+
+**Request Body**
+`Json: 
+{
+  "email": "user@mail.com",
+  "password": "password123"
+}`
+
+**Response Body**
+`{
+  "token": "JWT_TOKEN_HERE"
+}`
+
+### 📦 Product – Create Product (Seller)
+
+| Method | Endpoint | Description |
+|------|---------|------------|
+| POST | `/products` | Create New Product |
+
+**Header**
+Authorization: Bearer JWT_TOKEN_HERE
+
+**Request Body**
+`{
+  "name": "Laptop",
+  "price": 15000000,
+  "stock": 5
+}`
+
+### 🛒 Order – Create Order
+
+| Method | Endpoint | Description |
+|------|---------|------------|
+| POST | `/orders` | Create New Order |
+
+**Header**
+Authorization: Bearer JWT_TOKEN_HERE
+
+### 🛒 Order – Add Item
+
+| Method | Endpoint | Description |
+|------|---------|------------|
+| POST | `/orders/{orderId}/items` | Add Item to Order |
+
+**Request Body**
+`{
+  "productId": 1,
+  "quantity": 2
+}`
+
+### 💳 Payment – Pay Order
+| Method | Endpoint | Description |
+|------|---------|------------|
+| POST | `/payments/pay/{orderId}` | Process Payment |
 
 ## 📊 Evaluasi Teknis & Finalisasi Portofolio
 Kelebihan
